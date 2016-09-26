@@ -123,4 +123,11 @@
     <!-- Weather string format in expanded statusbar header -->
      <string name="status_bar_weather_format"><xliff:g id="temp">%1$s</xliff:g></string>
 
+
+    <!-- Sync QS Tile -->
+    <string name="quick_settings_sync_label">Sync</string>
+    <string name="accessibility_quick_settings_sync_off">Syncoff</string>
+    <string name="accessibility_quick_settings_sync_on">Sync on</string>
+    <string name="accessibility_quick_settings_sync_changed_off">Sync turned off</string>
+    <string name="accessibility_quick_settings_sync_changed_on">Sync turned on</string>
 </resources>
