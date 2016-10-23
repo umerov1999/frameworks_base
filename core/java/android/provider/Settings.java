@@ -4028,6 +4028,16 @@ public final class Settings {
         /** @hide */
         public static final Validator SIP_RECEIVE_CALLS_VALIDATOR = BOOLEAN_VALIDATOR;
 
+     /**
+         * Whether allowing pocket service to register sensors and dispatch informations.
+         * 0 = disabled
+         * 1 = enabled
+         * @author Carlo Savignano
+         * @hide
+         */
+        public static final String POCKET_JUDGE = "pocket_judge";
+
+
         /**
          * Call Preference String.
          * "SIP_ALWAYS" : Always use SIP with network access
