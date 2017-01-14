@@ -21,4 +21,8 @@
     <!-- AmbientD battery colors -->
     <color name="keyguard_default_primary_text_color">#ffffffff</color>
     <color name="keyguard_default_icon_color">#ffffffff</color>
+
+    <!-- Burn in protection -->
+    <bool name="config_statusBarBurnInProtection">false</bool>
+    <integer name="config_shift_interval">60</integer>
 </resources>
