@@ -19,7 +19,10 @@ package com.android.keyguard;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.app.ActivityManager;
+<<<<<<< HEAD
 import android.app.IActivityManager;
+=======
+import android.app.AlarmManager;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.res.Resources;
@@ -44,12 +47,16 @@ import android.util.Slog;
 import android.util.TypedValue;
 import android.view.View;
 import android.widget.GridLayout;
+<<<<<<< HEAD
 import android.widget.RelativeLayout;
+=======
 import android.widget.ImageView;
+>>>>>>> 79982cebbb7... SystemUI: Keyguard weather (1/2)
 import android.widget.TextClock;
 import android.widget.TextView;
 
 import com.android.internal.widget.LockPatternUtils;
+<<<<<<< HEAD
 import com.android.internal.widget.ViewClippingUtil;
 import com.android.systemui.Dependency;
 import com.android.systemui.Interpolators;
@@ -57,13 +64,21 @@ import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.util.wakelock.KeepAwakeAnimationListener;
 
 import com.google.android.collect.Sets;
+=======
+import com.android.systemui.ChargingView;
+import com.android.systemui.doze.DozeLog;
 import com.android.systemui.omni.OmniJawsClient;
+import com.android.systemui.statusbar.policy.DateView;
+>>>>>>> 79982cebbb7... SystemUI: Keyguard weather (1/2)
 
 import java.util.Locale;
 
 public class KeyguardStatusView extends GridLayout implements
-        ConfigurationController.ConfigurationListener, View.OnLayoutChangeListener, OmniJawsClient.OmniJawsObserver {
-
+<<<<<<< HEAD
+        ConfigurationController.ConfigurationListener, View.OnLayoutChangeListener {
+=======
+        OmniJawsClient.OmniJawsObserver {
+>>>>>>> 79982cebbb7... SystemUI: Keyguard weather (1/2)
     private static final boolean DEBUG = KeyguardConstants.DEBUG;
     private static final String TAG = "KeyguardStatusView";
     private static final int MARQUEE_DELAY_MS = 2000;
@@ -157,11 +172,14 @@ public class KeyguardStatusView extends GridLayout implements
         mIActivityManager = ActivityManager.getService();
         mLockPatternUtils = new LockPatternUtils(getContext());
         mHandler = new Handler(Looper.myLooper());
+<<<<<<< HEAD
         mSmallClockScale = getResources().getDimension(R.dimen.widget_small_font_size)
                 / getResources().getDimension(R.dimen.widget_big_font_size);
         onDensityOrFontScaleChanged();
+=======
         mWeatherClient = new OmniJawsClient(mContext);
         mWeatherEnabled = mWeatherClient.isOmniJawsEnabled();
+>>>>>>> 79982cebbb7... SystemUI: Keyguard weather (1/2)
     }
 
     private void setEnableMarquee(boolean enabled) {
@@ -203,6 +221,7 @@ public class KeyguardStatusView extends GridLayout implements
         mClockSeparator = findViewById(R.id.clock_separator);
         mVisibleInDoze = Sets.newArraySet(mClockView, mKeyguardSlice);
         mTextColor = mClockView.getCurrentTextColor();
+<<<<<<< HEAD
 
         int clockStroke = getResources().getDimensionPixelSize(R.dimen.widget_small_font_stroke);
         mClockView.getPaint().setStrokeWidth(clockStroke);
@@ -210,12 +229,15 @@ public class KeyguardStatusView extends GridLayout implements
         mClockSeparator.addOnLayoutChangeListener(this);
         mKeyguardSlice.setContentChangeListener(this::onSliceContentChanged);
         onSliceContentChanged();
+=======
+        mDateTextColor = mDateView.getCurrentTextColor();
+        mAlarmTextColor = mAlarmStatusView.getCurrentTextColor();
         mWeatherView = findViewById(R.id.keyguard_weather_view);
         mWeatherCity = (TextView) findViewById(R.id.city);
         mWeatherConditionImage = (ImageView) findViewById(R.id.weather_image);
         mWeatherCurrentTemp = (TextView) findViewById(R.id.current_temp);
         mWeatherConditionText = (TextView) findViewById(R.id.condition);
-        mSettingsObserver = new SettingsObserver(new Handler());
+>>>>>>> 79982cebbb7... SystemUI: Keyguard weather (1/2)
 
         boolean shouldMarquee = KeyguardUpdateMonitor.getInstance(mContext).isDeviceInteractive();
         setEnableMarquee(shouldMarquee);
@@ -224,6 +246,13 @@ public class KeyguardStatusView extends GridLayout implements
         updateLogoutView();
         updateDark();
 
+<<<<<<< HEAD
+=======
+        // Disable elegant text height because our fancy colon makes the ymin value huge for no
+        // reason.
+        mClockView.setElegantTextHeight(false);
+        mSettingsObserver = new SettingsObserver(new Handler());
+>>>>>>> 79982cebbb7... SystemUI: Keyguard weather (1/2)
     }
 
     private void onSliceContentChanged() {
@@ -382,21 +411,28 @@ public class KeyguardStatusView extends GridLayout implements
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
         KeyguardUpdateMonitor.getInstance(mContext).registerCallback(mInfoCallback);
+<<<<<<< HEAD
         Dependency.get(ConfigurationController.class).addCallback(this);
+=======
+        updateSettings(false);
         mWeatherEnabled = mWeatherClient.isOmniJawsEnabled();
         mWeatherClient.addObserver(this);
         mSettingsObserver.observe();
         queryAndUpdateWeather();
+>>>>>>> 79982cebbb7... SystemUI: Keyguard weather (1/2)
     }
 
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
         KeyguardUpdateMonitor.getInstance(mContext).removeCallback(mInfoCallback);
+<<<<<<< HEAD
         Dependency.get(ConfigurationController.class).removeCallback(this);
+=======
         mWeatherClient.removeObserver(this);
         mWeatherClient.cleanupObserver();
         mSettingsObserver.unobserve();
+>>>>>>> 79982cebbb7... SystemUI: Keyguard weather (1/2)
     }
 
     @Override
@@ -437,9 +473,23 @@ public class KeyguardStatusView extends GridLayout implements
         return false;
     }
 
+<<<<<<< HEAD
+=======
     private void updateSettings(boolean forceHide) {
         final ContentResolver resolver = getContext().getContentResolver();
         final Resources res = getContext().getResources();
+        AlarmManager.AlarmClockInfo nextAlarm =
+                mAlarmManager.getNextAlarmClock(UserHandle.USER_CURRENT);
+        boolean showAlarm = Settings.System.getIntForUser(resolver,
+                Settings.System.HIDE_LOCKSCREEN_ALARM, 1, UserHandle.USER_CURRENT) == 1;
+        boolean showClock = Settings.System.getIntForUser(resolver,
+                Settings.System.HIDE_LOCKSCREEN_CLOCK, 1, UserHandle.USER_CURRENT) == 1;
+        boolean showDate = Settings.System.getIntForUser(resolver,
+                Settings.System.HIDE_LOCKSCREEN_DATE, 1, UserHandle.USER_CURRENT) == 1;
+
+        mClockView = (TextClock) findViewById(R.id.clock_view);
+        mDateView = (DateView) findViewById(R.id.date_view);
+        mAlarmStatusView = (TextView) findViewById(R.id.alarm_status);
 
         View weatherPanel = findViewById(R.id.weather_panel);
         TextView noWeatherInfo = (TextView) findViewById(R.id.no_weather_info_text);
@@ -450,6 +500,21 @@ public class KeyguardStatusView extends GridLayout implements
         int defaultIconColor =
                 res.getColor(R.color.keyguard_default_icon_color);
 
+        if (!isDozeMode()) {
+            mClockView.setVisibility(showClock ? View.VISIBLE : View.GONE);
+        } else {
+            mClockView.setVisibility(View.VISIBLE);
+        }
+
+        if (!isDozeMode()) {
+            mDateView.setVisibility(showDate ? View.VISIBLE : View.GONE);
+        } else {
+            mDateView.setVisibility(View.VISIBLE);
+        }
+
+        if (!isDozeMode()) {
+            mAlarmStatusView.setVisibility(showAlarm && nextAlarm != null ? View.VISIBLE : View.GONE);
+        }
 
         if (mWeatherView != null) {
             mWeatherView.setVisibility(mShowWeather ?
@@ -499,6 +564,7 @@ public class KeyguardStatusView extends GridLayout implements
         if (DEBUG) Log.d(TAG, "weatherError " + errorReason);
     }
 
+>>>>>>> 79982cebbb7... SystemUI: Keyguard weather (1/2)
     // DateFormat.getBestDateTimePattern is extremely expensive, and refresh is called often.
     // This is an optimization to ensure we only recompute the patterns when the inputs change.
     private static final class Patterns {
@@ -671,5 +737,4 @@ public class KeyguardStatusView extends GridLayout implements
            updateSettings(false);
          }
     }
-
 }
