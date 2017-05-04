@@ -4042,6 +4042,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                 mUnlockMethodCache.isMethodSecure(),
                 mStatusBarKeyguardViewManager.isOccluded());
         Trace.endSection();
+        boolean onKeyguard = mState == StatusBarState.KEYGUARD;
     }
 
     /**
@@ -6101,7 +6102,9 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         // Scrim opacity varies based on notification count
         mScrimController.setNotificationCount(mStackScroller.getNotGoneChildCount());
+
     }
+
 
     protected void notifyHeadsUpGoingToSleep() {
         maybeEscalateHeadsUp();
