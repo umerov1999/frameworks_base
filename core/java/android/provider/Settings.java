@@ -4839,6 +4839,13 @@ public final class Settings {
         public static final String SMART_PIXELS_ON_POWER_SAVE = "smart_pixels_on_power_save";
 
         /**
+         * Boolean value whether to link ringtone and notification volume
+         *
+         * @hide
+         */
+        public static final String VOLUME_LINK_NOTIFICATION = "volume_link_notification";
+
+        /**
          * Settings to backup. This is here so that it's in the same place as the settings
          * keys and easy to update.
          *
