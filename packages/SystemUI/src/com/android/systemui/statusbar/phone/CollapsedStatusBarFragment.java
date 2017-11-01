@@ -72,15 +72,25 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
     private LinearLayout mCenterClockLayout;
     private final Handler mHandler = new Handler();
 
+// Statusbar Weather Image
+    private View mWeatherImageView;
+    private View mWeatherTextView;
+    private int mShowWeather;
+
+
     private class SettingsObserver extends ContentObserver {
        SettingsObserver(Handler handler) {
            super(handler);
        }
 
+
        void observe() {
          mContentResolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.STATUSBAR_CLOCK_STYLE),
                     false, this, UserHandle.USER_ALL);
+         mContentResolver.registerContentObserver(Settings.System.getUriFor(
+                     Settings.System.STATUS_BAR_SHOW_WEATHER_TEMP),
+                     false, this, UserHandle.USER_ALL);
        }
 
        @Override
@@ -128,6 +138,8 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
         mClockView = mStatusBar.findViewById(R.id.clock);
         mCenterClockLayout = (LinearLayout) mStatusBar.findViewById(R.id.center_clock_layout);
         mRightClock = mStatusBar.findViewById(R.id.right_clock);
+        mWeatherTextView = mStatusBar.findViewById(R.id.weather_temp);
+        mWeatherImageView = mStatusBar.findViewById(R.id.weather_image);
         updateSettings(false);
         showSystemIconArea(false);
         initEmergencyCryptkeeperText();
@@ -342,6 +354,9 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
         mClockStyle = Settings.System.getIntForUser(mContentResolver,
                 Settings.System.STATUSBAR_CLOCK_STYLE, 0, UserHandle.USER_CURRENT);
         updateClockStyle(animate);
+        mShowWeather = Settings.System.getIntForUser(
+                getContext().getContentResolver(), Settings.System.STATUS_BAR_SHOW_WEATHER_TEMP, 0,
+                UserHandle.USER_CURRENT);
     }
 
     private void updateClockStyle(boolean animate) {
