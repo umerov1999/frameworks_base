@@ -720,6 +720,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         mLockPatternUtils = new LockPatternUtils(mContext);
 
         mMediaManager.setUpWithPresenter(this, mEntryManager);
+        mCurrentUserId = ActivityManager.getCurrentUser();
 
         // Connect in to the status bar manager service
         mCommandQueue = getComponent(CommandQueue.class);
@@ -1215,6 +1216,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     @Override
     public void onOverlayChanged() {
+         mKeyguardStatusBar.onOverlayChanged();
         if (mBrightnessMirrorController != null) {
             mBrightnessMirrorController.onOverlayChanged();
         }
@@ -1581,6 +1583,31 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     public boolean areNotificationsHidden() {
         return mZenController.areNotificationsHiddenInShade();
+    }
+
+    public boolean isCurrentRoundedSameAsFw() {
+        Resources res = null;
+        try {
+            res = mContext.getPackageManager().getResourcesForApplication("com.android.systemui");
+        } catch (NameNotFoundException e) {
+            e.printStackTrace();
+            // If we can't get resources, return true so that updateTheme doesn't attempt to
+            // set corner values
+            return true;
+        }
+        float displayDensity = res.getDisplayMetrics().density;
+        // Resource IDs for framework properties
+        int resourceIdRadius = res.getIdentifier("com.android.systemui:dimen/rounded_corner_radius", null, null);
+        int resourceIdPadding = res.getIdentifier("com.android.systemui:dimen/rounded_corner_content_padding", null, null);
+        // Values on framework resources
+        int cornerRadiusRes = (int) (res.getDimension(resourceIdRadius)/displayDensity);
+        int contentPaddingRes = (int) (res.getDimension(resourceIdPadding)/displayDensity);
+        // Values in Settings DBs
+        int cornerRadius = Settings.Secure.getInt(mContext.getContentResolver(),
+                Settings.Secure.SYSUI_ROUNDED_SIZE, cornerRadiusRes);
+        int contentPadding = Settings.Secure.getInt(mContext.getContentResolver(),
+                Settings.Secure.SYSUI_ROUNDED_CONTENT_PADDING, contentPaddingRes);
+         return (cornerRadiusRes == cornerRadius) && (contentPaddingRes == contentPadding);
     }
 
     public void requestNotificationUpdate() {
@@ -3985,7 +4012,7 @@ public class StatusBar extends SystemUI implements DemoMode,
      */
     protected void updateTheme() {
         final boolean inflated = mStackScroller != null;
-
+         int userId = mCurrentUserId;
         // The system wallpaper defines if QS should be light or dark.
         WallpaperColors systemColors = mColorExtractor
                 .getWallpaperColors(WallpaperManager.FLAG_SYSTEM);
@@ -4028,6 +4055,27 @@ public class StatusBar extends SystemUI implements DemoMode,
             // Make sure we have the correct navbar/statusbar colors.
             mStatusBarWindowManager.setKeyguardDark(useDarkText);
         }
+
+        boolean sysuiRoundedFwvals = Settings.Secure.getIntForUser(mContext.getContentResolver(),
+                    Settings.Secure.SYSUI_ROUNDED_FWVALS, 1, mCurrentUserId) == 1;
+        if (sysuiRoundedFwvals && !isCurrentRoundedSameAsFw()) {
+             Resources res = null;
+            try {
+                res = mContext.getPackageManager().getResourcesForApplication("com.android.systemui");
+            } catch (NameNotFoundException e) {
+                e.printStackTrace();
+            }
+            float displayDensity = res.getDisplayMetrics().density;
+            if (res != null) {
+                int resourceIdRadius = res.getIdentifier("com.android.systemui:dimen/rounded_corner_radius", null, null);
+                Settings.Secure.putInt(mContext.getContentResolver(),
+                    Settings.Secure.SYSUI_ROUNDED_SIZE, (int) (res.getDimension(resourceIdRadius)/displayDensity));
+                int resourceIdPadding = res.getIdentifier("com.android.systemui:dimen/rounded_corner_content_padding", null, null);
+                Settings.Secure.putInt(mContext.getContentResolver(),
+                    Settings.Secure.SYSUI_ROUNDED_CONTENT_PADDING, (int) (res.getDimension(resourceIdPadding)/displayDensity));
+            }
+        }
+
     }
 
     private void updateDozingState() {
@@ -4703,18 +4751,28 @@ public class StatusBar extends SystemUI implements DemoMode,
             resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.DOUBLE_TAP_SLEEP_GESTURE),
                     false, this, UserHandle.USER_ALL);
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.Secure.SYSUI_ROUNDED_FWVALS),
+                    false, this, UserHandle.USER_ALL);
         }
          @Override
-        public void onChange(boolean selfChange, Uri uri) {
+          public void onChange(boolean selfChange, Uri uri) {
+            super.onChange(selfChange, uri);
             update();
+          if (uri.equals(Settings.System.getUriFor(
+              Settings.Secure.SYSUI_ROUNDED_FWVALS))) {
+                updateThemeAndReinflate();
         }
-         public void update() {
+   }
+
+       public void update() {
             setHeadsUpStoplist();
             setHeadsUpBlacklist();
             setQsPanelOptions();
             setLockscreenMediaMetadata();
             setLockscreenDoubleTapToSleep();
             setStatusDoubleTapToSleep();
+            updateTheme();
         }
     }
 
@@ -4799,6 +4857,15 @@ public class StatusBar extends SystemUI implements DemoMode,
             mStatusBarKeyguardViewManager.notifyDeviceWakeUpRequested();
             mFalsingManager.onScreenOnFromTouch();
         }
+    }
+
+    private void updateThemeAndReinflate(){
+        updateTheme();
+        mHandler.postDelayed(() -> {
+            if (mStatusBarView != null) {
+                onOverlayChanged();
+            }
+        }, 1000);
     }
 
     @Override
@@ -5844,4 +5911,5 @@ public class StatusBar extends SystemUI implements DemoMode,
                     saveImportance.run();
                 }
             };
+       protected int mCurrentUserId = 0;
 }

@@ -71,7 +71,7 @@
     <item type="id" name="panel_alpha_animator_tag"/>
     <item type="id" name="panel_alpha_animator_start_tag"/>
     <item type="id" name="panel_alpha_animator_end_tag"/>
-
+    <item type="id" name="display_cutout" />
     <!-- Whether the icon is from a notification for which targetSdk < L -->
     <item type="id" name="icon_is_pre_L"/>
 
