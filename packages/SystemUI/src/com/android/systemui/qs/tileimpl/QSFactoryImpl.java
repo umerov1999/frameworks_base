@@ -55,7 +55,7 @@ import com.android.systemui.qs.tiles.WifiTile;
 import com.android.systemui.qs.tiles.WorkModeTile;
 import com.android.systemui.qs.QSTileHost;
 import com.android.systemui.util.leak.GarbageMonitor;
-
+import com.android.systemui.qs.tiles.SmartPixelsTile;
 public class QSFactoryImpl implements QSFactory {
 
     private static final String TAG = "QSFactory";
@@ -134,6 +134,8 @@ public class QSFactoryImpl implements QSFactory {
                 return new ExpandedDesktopTile(mHost);
             case "gaming":
                 return new GamingModeTile(mHost);
+            case "smartpixels":
+                return new SmartPixelsTile(mHost);
         }
 
         // Intent tiles.
