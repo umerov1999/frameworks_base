@@ -1598,16 +1598,12 @@ public class StatusBar extends SystemUI implements DemoMode,
         float displayDensity = res.getDisplayMetrics().density;
         // Resource IDs for framework properties
         int resourceIdRadius = res.getIdentifier("com.android.systemui:dimen/rounded_corner_radius", null, null);
-        int resourceIdPadding = res.getIdentifier("com.android.systemui:dimen/rounded_corner_content_padding", null, null);
         // Values on framework resources
         int cornerRadiusRes = (int) (res.getDimension(resourceIdRadius)/displayDensity);
-        int contentPaddingRes = (int) (res.getDimension(resourceIdPadding)/displayDensity);
         // Values in Settings DBs
         int cornerRadius = Settings.Secure.getInt(mContext.getContentResolver(),
                 Settings.Secure.SYSUI_ROUNDED_SIZE, cornerRadiusRes);
-        int contentPadding = Settings.Secure.getInt(mContext.getContentResolver(),
-                Settings.Secure.SYSUI_ROUNDED_CONTENT_PADDING, contentPaddingRes);
-         return (cornerRadiusRes == cornerRadius) && (contentPaddingRes == contentPadding);
+         return (cornerRadiusRes == cornerRadius);
     }
 
     public void requestNotificationUpdate() {
@@ -4070,9 +4066,6 @@ public class StatusBar extends SystemUI implements DemoMode,
                 int resourceIdRadius = res.getIdentifier("com.android.systemui:dimen/rounded_corner_radius", null, null);
                 Settings.Secure.putInt(mContext.getContentResolver(),
                     Settings.Secure.SYSUI_ROUNDED_SIZE, (int) (res.getDimension(resourceIdRadius)/displayDensity));
-                int resourceIdPadding = res.getIdentifier("com.android.systemui:dimen/rounded_corner_content_padding", null, null);
-                Settings.Secure.putInt(mContext.getContentResolver(),
-                    Settings.Secure.SYSUI_ROUNDED_CONTENT_PADDING, (int) (res.getDimension(resourceIdPadding)/displayDensity));
             }
         }
 
