@@ -96,6 +96,7 @@ public class ScreenDecorations extends SystemUI implements Tunable {
         mWindowManager = mContext.getSystemService(WindowManager.class);
         mRoundedDefault = mContext.getResources().getDimensionPixelSize(
                 R.dimen.rounded_corner_radius);
+                 setupRounding();
         mRoundedDefaultTop = mContext.getResources().getDimensionPixelSize(
                 R.dimen.rounded_corner_radius_top);
         mRoundedDefaultBottom = mContext.getResources().getDimensionPixelSize(
@@ -139,6 +140,68 @@ public class ScreenDecorations extends SystemUI implements Tunable {
         mDisplayManager.registerDisplayListener(mDisplayListener, null);
     }
 
+      private void setupRounding() {
+        mOverlay = LayoutInflater.from(mContext)
+                .inflate(R.layout.rounded_corners, null);
+        mOverlay.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
+        mOverlay.setAlpha(0);
+        mOverlay.findViewById(R.id.right).setRotation(90);
+
+        mContext.getSystemService(WindowManager.class)
+                .addView(mOverlay, getWindowLayoutParams());
+        mBottomOverlay = LayoutInflater.from(mContext)
+                .inflate(R.layout.rounded_corners, null);
+        mBottomOverlay.setAlpha(0);
+        mBottomOverlay.findViewById(R.id.right).setRotation(180);
+        mBottomOverlay.findViewById(R.id.left).setRotation(270);
+        WindowManager.LayoutParams layoutParams = getWindowLayoutParams();
+        layoutParams.gravity = Gravity.BOTTOM;
+        mContext.getSystemService(WindowManager.class)
+                .addView(mBottomOverlay, layoutParams);
+
+        DisplayMetrics metrics = new DisplayMetrics();
+        mContext.getSystemService(WindowManager.class)
+                .getDefaultDisplay().getMetrics(metrics);
+        mDensity = metrics.density;
+
+        Dependency.get(TunerService.class).addTunable(this, SIZE);
+
+        // Watch color inversion and invert the overlay as needed.
+        SecureSetting setting = new SecureSetting(mContext, Dependency.get(Dependency.MAIN_HANDLER),
+                Secure.ACCESSIBILITY_DISPLAY_INVERSION_ENABLED) {
+            @Override
+            protected void handleValueChanged(int value, boolean observedChange) {
+                int tint = value != 0 ? Color.WHITE : Color.BLACK;
+                ColorStateList tintList = ColorStateList.valueOf(tint);
+                ((ImageView) mOverlay.findViewById(R.id.left)).setImageTintList(tintList);
+                ((ImageView) mOverlay.findViewById(R.id.right)).setImageTintList(tintList);
+                ((ImageView) mBottomOverlay.findViewById(R.id.left)).setImageTintList(tintList);
+                ((ImageView) mBottomOverlay.findViewById(R.id.right)).setImageTintList(tintList);
+            }
+        };
+        setting.setListening(true);
+        setting.onChange(false);
+
+        mOverlay.addOnLayoutChangeListener(new OnLayoutChangeListener() {
+            @Override
+            public void onLayoutChange(View v, int left, int top, int right, int bottom,
+                    int oldLeft,
+                    int oldTop, int oldRight, int oldBottom) {
+                mOverlay.removeOnLayoutChangeListener(this);
+                mOverlay.animate()
+                        .alpha(1)
+                        .setDuration(1000)
+                        .start();
+                mBottomOverlay.animate()
+                        .alpha(1)
+                        .setDuration(1000)
+                        .start();
+            }
+        });
+    }
+
+
+
     private void setupDecorations() {
         mOverlay = LayoutInflater.from(mContext)
                 .inflate(R.layout.rounded_corners, null);
@@ -158,9 +221,6 @@ public class ScreenDecorations extends SystemUI implements Tunable {
         mBottomOverlay.setAlpha(0);
 
         updateViews();
-
-        mWindowManager.addView(mOverlay, getWindowLayoutParams());
-        mWindowManager.addView(mBottomOverlay, getBottomLayoutParams());
 
         DisplayMetrics metrics = new DisplayMetrics();
         mWindowManager.getDefaultDisplay().getMetrics(metrics);
@@ -216,11 +276,6 @@ public class ScreenDecorations extends SystemUI implements Tunable {
         int newRotation = RotationUtils.getExactRotation(mContext);
         if (newRotation != mRotation) {
             mRotation = newRotation;
-
-            if (mOverlay != null) {
-                updateLayoutParams();
-                updateViews();
-            }
         }
     }
 
@@ -304,56 +359,25 @@ public class ScreenDecorations extends SystemUI implements Tunable {
         }
     }
 
-    @VisibleForTesting
-    WindowManager.LayoutParams getWindowLayoutParams() {
+       private WindowManager.LayoutParams getWindowLayoutParams() {
         final WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 LayoutParams.WRAP_CONTENT,
                 WindowManager.LayoutParams.TYPE_NAVIGATION_BAR_PANEL,
-                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+                WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
+                        | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
                         | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
                         | WindowManager.LayoutParams.FLAG_SPLIT_TOUCH
                         | WindowManager.LayoutParams.FLAG_SLIPPERY
                         | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN,
                 PixelFormat.TRANSLUCENT);
         lp.privateFlags |= WindowManager.LayoutParams.PRIVATE_FLAG_SHOW_FOR_ALL_USERS
-                | WindowManager.LayoutParams.PRIVATE_FLAG_NO_MOVE_ANIMATION;
-
-        if (!DEBUG_SCREENSHOT_ROUNDED_CORNERS) {
-            lp.privateFlags |= WindowManager.LayoutParams.PRIVATE_FLAG_IS_ROUNDED_CORNERS_OVERLAY;
-        }
-
-        lp.setTitle("ScreenDecorOverlay");
-        if (mRotation == RotationUtils.ROTATION_SEASCAPE
-                || mRotation == RotationUtils.ROTATION_UPSIDE_DOWN) {
-            lp.gravity = Gravity.BOTTOM | Gravity.RIGHT;
-        } else {
-            lp.gravity = Gravity.TOP | Gravity.LEFT;
-        }
-        lp.layoutInDisplayCutoutMode = LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
-        if (isLandscape(mRotation)) {
-            lp.width = WRAP_CONTENT;
-            lp.height = MATCH_PARENT;
-        }
+                | WindowManager.LayoutParams.PRIVATE_FLAG_IS_ROUNDED_CORNERS_OVERLAY;
+        lp.setTitle("RoundedOverlay");
+        lp.gravity = Gravity.TOP;
         return lp;
     }
 
-    private WindowManager.LayoutParams getBottomLayoutParams() {
-        WindowManager.LayoutParams lp = getWindowLayoutParams();
-        lp.setTitle("ScreenDecorOverlayBottom");
-        if (mRotation == RotationUtils.ROTATION_SEASCAPE
-                || mRotation == RotationUtils.ROTATION_UPSIDE_DOWN) {
-            lp.gravity = Gravity.TOP | Gravity.LEFT;
-        } else {
-            lp.gravity = Gravity.BOTTOM | Gravity.RIGHT;
-        }
-        return lp;
-    }
-
-    private void updateLayoutParams() {
-        mWindowManager.updateViewLayout(mOverlay, getWindowLayoutParams());
-        mWindowManager.updateViewLayout(mBottomOverlay, getBottomLayoutParams());
-    }
 
     @Override
     public void onTuningChanged(String key, String newValue) {
