@@ -453,7 +453,6 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             }
         };
 
->>>>>>> 73a6cc7ebaa... Power menu advanced reboot: make it dynamic
         mItems = new ArrayList<Action>();
         String[] defaultActions = mContext.getResources().getStringArray(
                 R.array.config_globalActionsList);
