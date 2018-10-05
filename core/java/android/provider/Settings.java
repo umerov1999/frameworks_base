@@ -4823,6 +4823,9 @@ public final class Settings {
          * @hide
          */
         public static final String NOTIFICATION_SOUND_VIB_SCREEN_ON = "notification_sound_vib_screen_on";
+        /** @hide */
+        private static final Validator NOTIFICATION_SOUND_VIB_SCREEN_ON_VALIDATOR =
+                BOOLEAN_VALIDATOR;
 
       /**
          * Select various accents to go along with system themes
@@ -4863,24 +4866,36 @@ public final class Settings {
          * @hide
          */
         public static final String SMART_PIXELS_ENABLE = "smart_pixels_enable";
+        /** @hide */
+        private static final Validator SMART_PIXELS_ENABLE_VALIDATOR =
+                BOOLEAN_VALIDATOR;
 
         /**
          * Smart Pixels pattern
          * @hide
          */
         public static final String SMART_PIXELS_PATTERN = "smart_pixels_pattern";
+        /** @hide */
+        private static final Validator SMART_PIXELS_PATTERN_VALIDATOR =
+                ANY_INTEGER_VALIDATOR;
 
         /**
          * Smart Pixels Shift Timeout
          * @hide
          */
         public static final String SMART_PIXELS_SHIFT_TIMEOUT = "smart_pixels_shift_timeout";
+        /** @hide */
+        private static final Validator SMART_PIXELS_SHIFT_TIMEOUT_VALIDATOR =
+                ANY_INTEGER_VALIDATOR;
 
         /**
          * Whether Smart Pixels should enable on power saver mode
          * @hide
          */
         public static final String SMART_PIXELS_ON_POWER_SAVE = "smart_pixels_on_power_save";
+        /** @hide */
+        private static final Validator SMART_PIXELS_ON_POWER_SAVE_VALIDATOR =
+                BOOLEAN_VALIDATOR;
 
         /**
          * Settings to backup. This is here so that it's in the same place as the settings
@@ -5009,7 +5024,12 @@ public final class Settings {
             STATUSBAR_CLOCK_AM_PM_STYLE,
             STATUSBAR_CLOCK_DATE_DISPLAY,
             STATUSBAR_CLOCK_DATE_STYLE,
-            STATUSBAR_CLOCK_DATE_FORMAT
+            STATUSBAR_CLOCK_DATE_FORMAT,
+            NOTIFICATION_SOUND_VIB_SCREEN_ON,
+            SMART_PIXELS_ENABLE,
+            SMART_PIXELS_PATTERN,
+            SMART_PIXELS_SHIFT_TIMEOUT,
+            SMART_PIXELS_ON_POWER_SAVE
         };
 
         /**
@@ -5193,6 +5213,11 @@ public final class Settings {
             PRIVATE_SETTINGS.add(STATUSBAR_CLOCK_DATE_DISPLAY);
             PRIVATE_SETTINGS.add(STATUSBAR_CLOCK_DATE_STYLE);
             PRIVATE_SETTINGS.add(STATUSBAR_CLOCK_DATE_FORMAT);
+            PRIVATE_SETTINGS.add(NOTIFICATION_SOUND_VIB_SCREEN_ON);
+            PRIVATE_SETTINGS.add(SMART_PIXELS_ENABLE);
+            PRIVATE_SETTINGS.add(SMART_PIXELS_PATTERN);
+            PRIVATE_SETTINGS.add(SMART_PIXELS_SHIFT_TIMEOUT);
+            PRIVATE_SETTINGS.add(SMART_PIXELS_ON_POWER_SAVE);
         }
 
         /**
@@ -5352,6 +5377,11 @@ public final class Settings {
             VALIDATORS.put(STATUSBAR_CLOCK_DATE_DISPLAY, STATUSBAR_CLOCK_DATE_DISPLAY_VALIDATOR);
             VALIDATORS.put(STATUSBAR_CLOCK_DATE_STYLE, STATUSBAR_CLOCK_DATE_STYLE_VALIDATOR);
             VALIDATORS.put(STATUSBAR_CLOCK_DATE_FORMAT, STATUSBAR_CLOCK_DATE_FORMAT_VALIDATOR);
+            VALIDATORS.put(NOTIFICATION_SOUND_VIB_SCREEN_ON, NOTIFICATION_SOUND_VIB_SCREEN_ON_VALIDATOR);
+            VALIDATORS.put(SMART_PIXELS_ENABLE, SMART_PIXELS_ENABLE_VALIDATOR);
+            VALIDATORS.put(SMART_PIXELS_PATTERN, SMART_PIXELS_PATTERN_VALIDATOR);
+            VALIDATORS.put(SMART_PIXELS_SHIFT_TIMEOUT, SMART_PIXELS_SHIFT_TIMEOUT_VALIDATOR);
+            VALIDATORS.put(SMART_PIXELS_ON_POWER_SAVE, SMART_PIXELS_ON_POWER_SAVE_VALIDATOR);
         }
 
         /**
