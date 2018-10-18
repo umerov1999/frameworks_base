@@ -194,6 +194,7 @@ public final class BatteryService extends SystemService {
     private boolean mIsDndActive;
     private boolean mLowBatteryBlinking;
     private boolean mMultiColorLed;
+    private int mBatteryDashARGB;
     private int mBatteryLowARGB;
     private int mBatteryMediumARGB;
     private int mBatteryFullARGB;
@@ -357,6 +358,8 @@ public final class BatteryService extends SystemService {
                     Settings.System.BATTERY_LIGHT_FULL_COLOR, 0xFFFFFF00);
             mBatteryReallyFullARGB = Settings.System.getInt(resolver,
                     Settings.System.BATTERY_LIGHT_REALLYFULL_COLOR, 0xFF00FF00);
+            
+            mBatteryDashARGB = 0xFF0000FF;
 
             updateLed();
         }
@@ -1206,7 +1209,10 @@ public final class BatteryService extends SystemService {
                         mBatteryLight.setColor(mBatteryReallyFullARGB);
                     } else {
                         // Battery is full or charging and nearly full
-                        mBatteryLight.setColor(mBatteryFullARGB);
+                        if(mHasDashCharger && isDashCharger())
+                            mBatteryLight.setColor(mBatteryDashARGB);
+                        else
+                            mBatteryLight.setColor(mBatteryFullARGB);
                     }
                 } else {
                     // Battery is charging and halfway full
